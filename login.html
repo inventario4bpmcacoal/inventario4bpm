@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Acesso — Inventário | 4º BPM</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #00e5b4;
+    --accent-dim: rgba(0,229,180,0.12);
+    --accent-border: rgba(0,229,180,0.35);
+    --bg: #040608;
+    --surface: #090c10;
+    --border: #151c25;
+    --text: #d8e8f5;
+    --text-muted: #445566;
+    --green: #00e5b4;
+    --danger: #ef5350;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,180,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,180,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;animation:gridMove 20s linear infinite}
+  @keyframes gridMove{to{background-position:40px 40px}}
+  .glow{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+  .glow-1{width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(0,229,180,.09),transparent 70%)}
+  .glow-2{width:500px;height:500px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(61,155,255,.07),transparent 70%)}
+  .container{position:relative;z-index:1;width:100%;max-width:420px;padding:24px 20px;animation:fadeUp .6s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .logo-area{text-align:center;margin-bottom:32px}
+  .logo-emblem{width:64px;height:64px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent-border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 32px rgba(0,229,180,.15);animation:pulse 3s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 32px rgba(0,229,180,.15)}50%{box-shadow:0 0 52px rgba(0,229,180,.3)}}
+  .logo-badge{display:inline-block;border:1px solid var(--accent-border);background:var(--accent-dim);padding:5px 16px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--accent);margin-bottom:14px}
+  .logo-title{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;letter-spacing:2px;color:#fff;line-height:1.1;text-shadow:0 0 24px rgba(0,229,180,.2)}
+  .logo-sub{font-size:12px;color:var(--text-muted);margin-top:5px;letter-spacing:1px}
+  .terminal-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .terminal-bar{background:#040608;border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%}.dot-r{background:#2a1010}.dot-y{background:#2a2a10}.dot-g{background:#102a10}
+  .terminal-title{margin-left:6px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted)}
+  .terminal-cursor{display:inline-block;width:7px;height:12px;background:var(--accent);margin-left:4px;animation:blink 1s step-end infinite;vertical-align:middle}
+  @keyframes blink{50%{opacity:0}}
+  .terminal-body{padding:24px 22px 28px}
+  .prompt-line{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-muted);margin-bottom:22px;display:flex;align-items:center;gap:8px}
+  .prompt-line::before{content:'›';color:var(--accent);font-size:16px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase}
+  .field-wrap{position:relative}
+  .field-wrap input{width:100%;padding:13px 14px;background:#040608;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:15px;letter-spacing:1px;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+  .field-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+  .field-wrap input::placeholder{color:#1e2a35;letter-spacing:0}
+  .toggle-pass{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;transition:color .2s}
+  .toggle-pass:hover{color:var(--accent)}
+  .error-msg{background:rgba(239,83,80,.08);border:1px solid rgba(239,83,80,.25);border-left:3px solid var(--danger);border-radius:6px;padding:11px 14px;margin-bottom:18px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#ef9a9a;display:none;letter-spacing:.5px;animation:slideIn .2s ease}
+  .error-msg.show{display:block}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .btn-login{width:100%;padding:15px;background:linear-gradient(135deg,#00b894,#00e5b4);border:none;border-radius:6px;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(0,229,180,.25)}
+  .btn-login:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-login:active{transform:scale(0.98)}
+  .btn-login:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .status-line{margin-top:20px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:8px}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:statusPulse 2s infinite}
+  @keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+  .overlay.show{display:flex}
+  .spinner{width:38px;height:38px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .overlay-text{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-muted);letter-spacing:1px}
+  .footer-text{text-align:center;margin-top:22px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#10151a;letter-spacing:1.5px;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+<div class="container">
+  <div class="logo-area">
+    <div class="logo-emblem">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00e5b4" stroke-width="1.5">
+        <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+      </svg>
+    </div>
+    <div class="logo-badge">4º BPM — P4</div>
+    <div class="logo-title">INVENTÁRIO</div>
+    <div class="logo-sub">CONTROLE DE PATRIMÔNIO</div>
+  </div>
+
+  <div class="terminal-box">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <div class="terminal-title">auth_inventario.sh — acesso restrito<span class="terminal-cursor"></span></div>
+    </div>
+    <div class="terminal-body">
+      <div class="prompt-line">identificação obrigatória para acesso ao sistema</div>
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="field">
+        <label>Matrícula</label>
+        <div class="field-wrap">
+          <input type="text" id="matricula" placeholder="000000"
+            autocomplete="username" autocapitalize="characters" spellcheck="false"
+            onkeydown="onEnter(event)">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <div class="field-wrap">
+          <input type="password" id="senha" placeholder="••••••••"
+            autocomplete="current-password" onkeydown="onEnter(event)" style="padding-right:44px">
+          <button class="toggle-pass" type="button" onclick="toggleSenha()" aria-label="Mostrar senha">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eyeIcon">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btnLogin" onclick="fazerLogin()">ACESSAR SISTEMA</button>
+
+      <div class="status-line">
+        <div class="status-dot"></div>
+        sistema operacional
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-text">Polícia Militar do Estado de Rondônia</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text" id="overlayTxt">AUTENTICANDO...</div>
+</div>
+
+<script src="config.js"></script>
+<script>
+  // Redireciona se já tem sessão ativa
+  window.addEventListener('load', () => {
+    const s = invSessao.carregar();
+    if (s) window.location.href = 'dashboard.html';
+    document.getElementById('matricula').focus();
+  });
+
+  function onEnter(e) { if (e.key === 'Enter') fazerLogin(); }
+
+  function toggleSenha() {
+    const inp = document.getElementById('senha');
+    const icon = document.getElementById('eyeIcon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      inp.type = 'password';
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  function showMsg(texto, tipo) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = texto;
+    el.className = 'error-msg show';
+  }
+
+  function setLoading(on, txt) {
+    document.getElementById('overlay').classList.toggle('show', on);
+    document.getElementById('overlayTxt').textContent = txt || 'AUTENTICANDO...';
+    document.getElementById('btnLogin').disabled = on;
+    document.getElementById('matricula').disabled = on;
+    document.getElementById('senha').disabled = on;
+  }
+
+  async function fazerLogin() {
+    const matricula = document.getElementById('matricula').value.trim().toUpperCase();
+    const senha = document.getElementById('senha').value;
+    document.getElementById('errorMsg').className = 'error-msg';
+
+    if (!matricula) { showMsg('⚠ Informe sua matrícula.'); return; }
+    if (!senha)     { showMsg('⚠ Informe sua senha.'); return; }
+
+    setLoading(true, 'AUTENTICANDO...');
+
+    try {
+      const r = await invApi.login(matricula, senha);
+
+      if (!r || !r.sucesso) {
+        setLoading(false);
+        showMsg('✗ ' + (r?.mensagem || 'Matrícula ou senha incorretos.'));
+        document.getElementById('senha').value = '';
+        document.getElementById('senha').focus();
+        return;
+      }
+
+      setLoading(true, 'INICIANDO SESSÃO...');
+
+      invSessao.salvar(r.token, {
+        matricula:  r.matricula,
+        nomeGuerra: r.nomeGuerra,
+        perfil:     r.perfil
+      });
+
+      window.location.href = 'dashboard.html';
+
+    } catch(e) {
+      setLoading(false);
+      showMsg('✗ Erro de conexão. Verifique sua internet.');
+    }
+  }
+</script>
+</body>
+</html>
