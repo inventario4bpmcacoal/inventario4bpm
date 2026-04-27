@@ -11,7 +11,7 @@ const INV_CONFIG = {
   //  👉  COLE AQUI A URL DO SEU APPS SCRIPT (Web App) APÓS REIMPLANTAR
   //  Exemplo: 'https://script.google.com/macros/s/XXXXXXXXXXXXXXX/exec'
   // ══════════════════════════════════════════════════════════════════════════
-  API_URL:          'COLE_AQUI_A_URL_DO_APPS_SCRIPT',
+  API_URL:          'https://script.google.com/macros/s/AKfycbx3KRLtQ2uYmOh04v7EDpjMjrotYDs2zhIJBTNJmLx6j_4_M6HmjbRaSN91Awto-tdLLw/exec',
   SESSION_DURATION: 8 * 60 * 60 * 1000,  // 8 horas em ms
   TIMEOUT_MS:       20000,                // 20 s — GAS pode ser lento
   VERSION:          '1.0.0'
