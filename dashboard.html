@@ -255,9 +255,87 @@ tr:hover td{background:rgba(0,229,180,.02)}
 
 .admin-only{display:none}
 @media(max-width:700px){.fg{grid-template-columns:1fr 1fr}.f3,.f4{grid-column:span 2}.dash-grid{grid-template-columns:repeat(2,1fr)}.tb-search{display:none}.tb-counts{display:none}}
+
+/* ── MOBILE RESPONSIVO ────────────────────────────────── */
+.mob-menu-btn{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--ink3);color:var(--txt2);cursor:pointer;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all var(--tr)}
+.mob-menu-btn:hover{color:var(--txt);border-color:var(--line2)}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49;backdrop-filter:blur(2px)}
+.sb-overlay.on{display:block}
+
+@media(max-width:768px){
+  :root{--sb-w:260px;--hdr-h:50px}
+
+  /* Sidebar vira drawer lateral */
+  .sb{
+    position:fixed;top:0;left:0;bottom:0;z-index:50;
+    transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    box-shadow:4px 0 30px rgba(0,0,0,.5)
+  }
+  .sb.open{transform:translateX(0)}
+
+  /* Botão hambúrguer visível */
+  .mob-menu-btn{display:flex}
+
+  /* Topbar ajustada */
+  .topbar{padding:0 12px;gap:8px}
+  .tb-counts{display:none!important}
+  .tb-search{display:none!important}
+
+  /* Conteúdo ocupa tela toda */
+  .main{width:100%}
+  .content{padding:12px}
+
+  /* Tabelas: scroll horizontal */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px}
+
+  /* Modal ocupa mais espaço */
+  .ov{padding:12px 8px}
+  .modal{max-width:100%;border-radius:10px}
+  .mb{padding:14px}
+  .mf{padding:10px 14px}
+  .fg{grid-template-columns:1fr!important}
+  .f1,.f2,.f3,.f4{grid-column:span 1!important}
+
+  /* Dashboard grid 2 cols */
+  .dash-grid{grid-template-columns:repeat(2,1fr)!important}
+
+  /* Section bar filtros empilhados */
+  .bar{flex-direction:column;align-items:stretch;gap:7px}
+  .bl,.br{flex-wrap:wrap;width:100%}
+  .br{margin-left:0}
+  select.c{min-width:0;flex:1}
+  input.c{min-width:0;flex:1}
+
+  /* Transfer box */
+  .transfer-box{max-width:100%}
+
+  /* Toast */
+  .toast-el{right:8px;left:8px;max-width:unset;bottom:16px}
+
+  /* Paginação */
+  .pag{flex-direction:column;gap:6px;align-items:flex-start}
+
+  /* Foto cards */
+  .fcard{width:130px}
+
+  /* User dropdown */
+  .usr-dd{left:6px;right:6px;bottom:58px}
+}
+
+@media(max-width:480px){
+  .dash-grid{grid-template-columns:1fr!important}
+  .two-col{grid-template-columns:1fr}
+  .rel-grid{grid-template-columns:1fr}
+  .tb-bc-r,.tb-bc-s{display:none}
+  .dc-val{font-size:24px}
+  table{min-width:520px;font-size:11px}
+  th,td{padding:7px 8px}
+}
 </style>
 </head>
 <body>
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 <div class="shell">
 <!-- ══════════════════════════════════ SIDEBAR ══════════════════════════════════ -->
 <aside class="sb" id="sidebar">
@@ -345,6 +423,7 @@ tr:hover td{background:rgba(0,229,180,.02)}
 <div class="main">
   <div class="topbar">
     <div class="tb-l">
+      <button class="mob-menu-btn" onclick="toggleSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
       <div class="tb-bc">
         <span class="tb-bc-r">Sistema</span>
         <span class="tb-bc-s"><i class="fas fa-chevron-right" style="font-size:8px"></i></span>
@@ -1283,6 +1362,21 @@ function toast(msg, tipo) {
   document.body.appendChild(el); setTimeout(()=>el.remove(),4000);
 }
 document.querySelectorAll('.ov').forEach(o => o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('on'); }));
+
+// ── SIDEBAR MOBILE ────────────────────────────────────────
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar'), ov=document.getElementById('sbOverlay');
+  var open=sb.classList.toggle('open');
+  ov.classList.toggle('on',open);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('on');
+}
+// Fecha sidebar ao navegar no mobile
+document.querySelectorAll('.sb-item,.sub-item').forEach(el=>{
+  el.addEventListener('click',()=>{ if(window.innerWidth<=768) setTimeout(closeSidebar,120); });
+});
 </script>
 </body>
 </html>

@@ -19,7 +19,7 @@
     --danger: #ef5350;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-x:hidden;overflow-y:auto}
   body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,180,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,180,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;animation:gridMove 20s linear infinite}
   @keyframes gridMove{to{background-position:40px 40px}}
   .glow{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
@@ -66,6 +66,15 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .overlay-text{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text-muted);letter-spacing:1px}
   .footer-text{text-align:center;margin-top:22px;font-family:'Share Tech Mono',monospace;font-size:10px;color:#10151a;letter-spacing:1.5px;text-transform:uppercase}
+  @media(max-width:480px){
+    .container{padding:20px 14px}
+    .logo-emblem{width:54px;height:54px}
+    .logo-title{font-size:24px}
+    .terminal-body{padding:18px 16px 22px}
+    .btn-login{font-size:15px;padding:13px}
+    .field-wrap input{font-size:14px;padding:11px 12px}
+    .glow-1,.glow-2{display:none}
+  }
 </style>
 </head>
 <body>
