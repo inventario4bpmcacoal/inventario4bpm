@@ -491,12 +491,15 @@ tr:hover td{background:rgba(0,229,180,.02)}
     <div class="pg" id="pgSec">
       <div class="bar">
         <div class="bl" style="font-weight:700;font-size:13px"><i class="fas fa-folder-open" style="color:var(--ac2);margin-right:6px"></i>Gerenciar Seções</div>
-        <div class="br"><button class="btn btn-p" onclick="abrirSecao()"><i class="fas fa-folder-plus"></i> Nova Seção</button></div>
+        <div class="br">
+          <button class="btn btn-p" onclick="abrirSecao()"><i class="fas fa-folder-plus"></i> Nova Seção</button>
+          <button class="btn btn-b" onclick="sincronizarPastas()" title="Criar pastas no Drive para todas as seções"><i class="fas fa-sync-alt"></i> Sincronizar Pastas</button>
+        </div>
       </div>
       <div class="tw" style="max-height:calc(100vh - 220px)">
         <table>
-          <thead><tr><th>ID</th><th>Nome da Seção</th><th>Data de Criação</th><th style="text-align:center">Total de Itens</th><th>Aba na Planilha</th></tr></thead>
-          <tbody id="tbSec"><tr><td colspan="5" class="erow"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr></tbody>
+          <thead><tr><th>ID</th><th>Nome da Seção</th><th>Data de Criação</th><th style="text-align:center">Total de Itens</th><th>Aba na Planilha</th><th style="text-align:center">Ações</th></tr></thead>
+          <tbody id="tbSec"><tr><td colspan="6" class="erow"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -656,6 +659,30 @@ tr:hover td{background:rgba(0,229,180,.02)}
       </div>
     </div>
     <div class="mf"><button class="btn btn-s" onclick="fechar('ovAddFotos')">Cancelar</button><button class="btn btn-v" onclick="salvarAddFotos()"><i class="fas fa-cloud-upload-alt"></i> Enviar</button></div>
+  </div>
+</div>
+
+<!-- RENOMEAR SEÇÃO -->
+<div class="ov" id="ovRenomearSec">
+  <div class="modal" style="max-width:440px">
+    <div class="mh">
+      <div class="mt"><div class="mico" style="background:linear-gradient(135deg,var(--ac2),#2563eb)">✏️</div> Renomear Seção</div>
+      <button class="mx" onclick="fechar('ovRenomearSec')">✕</button>
+    </div>
+    <div class="mb">
+      <div class="info-bar" style="margin-bottom:14px">
+        <div class="ib-item"><span>Nome atual</span><strong style="color:var(--ac2)" id="rnNomeAtual">—</strong></div>
+      </div>
+      <div class="fgrp">
+        <label class="flbl">Novo Nome <span class="req">*</span></label>
+        <input type="text" class="c" id="rnNovoNome" style="width:100%;text-transform:uppercase" placeholder="Digite o novo nome"
+          onkeydown="if(event.key==='Enter') salvarRenomearSecao()">
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fechar('ovRenomearSec')">Cancelar</button>
+      <button class="btn btn-g" onclick="salvarRenomearSecao()"><i class="fas fa-save"></i> Renomear</button>
+    </div>
   </div>
 </div>
 
@@ -966,14 +993,23 @@ function bpCond(v) { var m={'EM USO':'b-emuso','OCIOSO':'b-ocioso','RECUPERÁVEL
 
 function renderSecoes() {
   var tb = document.getElementById('tbSec');
-  if (!_sec.length) { tb.innerHTML='<tr><td colspan="5" class="erow">Nenhuma seção cadastrada</td></tr>'; return; }
-  tb.innerHTML = _sec.map(s => `<tr>
-    <td style="color:var(--txt3);font-family:var(--mono)">${s.id}</td>
-    <td style="font-weight:700;color:var(--ac2)">${esc(s.nome)}</td>
-    <td style="font-size:10px;color:var(--txt3)">${s.dataCriacao||'—'}</td>
-    <td style="text-align:center"><span class="bp b-emuso">${s.totalItens||0}</span></td>
-    <td style="font-size:10px;color:var(--txt3);font-family:var(--mono)">${s.nomeAba||'—'}</td>
-  </tr>`).join('');
+  if (!_sec.length) { tb.innerHTML='<tr><td colspan="6" class="erow">Nenhuma seção cadastrada</td></tr>'; return; }
+  tb.innerHTML = _sec.map(s => {
+    var podeExcluir = (parseInt(s.totalItens)||0) === 0;
+    return `<tr>
+      <td style="color:var(--txt3);font-family:var(--mono)">${s.id}</td>
+      <td style="font-weight:700;color:var(--ac2)">${esc(s.nome)}</td>
+      <td style="font-size:10px;color:var(--txt3)">${s.dataCriacao||'—'}</td>
+      <td style="text-align:center"><span class="bp b-emuso">${s.totalItens||0}</span></td>
+      <td style="font-size:10px;color:var(--txt3);font-family:var(--mono)">${s.nomeAba||'—'}</td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="btn btn-b sm" onclick="abrirRenomearSecao(${s.id},'${esc(s.nome)}')" title="Renomear"><i class="fas fa-pen"></i></button>
+        ${podeExcluir
+          ? `<button class="btn btn-d sm" onclick="confirmarExcluirSecao(${s.id},'${esc(s.nome)}')" title="Excluir"><i class="fas fa-trash"></i></button>`
+          : `<button class="btn btn-s sm" disabled title="Possui itens — não pode excluir"><i class="fas fa-lock"></i></button>`}
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1058,6 +1094,63 @@ async function salvarSecao() {
     if (r.sucesso) { toast('Seção "'+nome+'" criada!','ok'); fechar('ovSec'); init(); }
     else toast(r.mensagem,'err');
   } catch(e) { unload(); toast('Erro: '+e.message,'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENOMEAR SEÇÃO
+// ═══════════════════════════════════════════════════════════
+var _rnSecaoId = null;
+function abrirRenomearSecao(secaoId, nomeAtual) {
+  _rnSecaoId = secaoId;
+  document.getElementById('rnNomeAtual').textContent = nomeAtual;
+  document.getElementById('rnNovoNome').value = nomeAtual;
+  document.getElementById('ovRenomearSec').classList.add('on');
+  setTimeout(() => document.getElementById('rnNovoNome').select(), 150);
+}
+async function salvarRenomearSecao() {
+  if (!_rnSecaoId) { toast('Contexto perdido.', 'err'); return; }
+  var novoNome = document.getElementById('rnNovoNome').value.trim().toUpperCase();
+  if (!novoNome) { toast('Digite um nome válido!', 'err'); return; }
+  loading('Renomeando seção...');
+  try {
+    var r = await invApi.renomearSecao(_token, _rnSecaoId, novoNome);
+    unload();
+    if (r.sucesso) { toast(r.mensagem, 'ok'); fechar('ovRenomearSec'); _rnSecaoId = null; init(); }
+    else if (r.expirado) { invSessao.limpar(); location.href='login.html'; }
+    else toast(r.mensagem, 'err');
+  } catch(e) { unload(); toast('Erro: '+e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXCLUIR SEÇÃO
+// ═══════════════════════════════════════════════════════════
+async function confirmarExcluirSecao(secaoId, nome) {
+  if (!confirm('Excluir a seção "'+nome+'"?\n\nEsta ação remove a aba da planilha e não pode ser desfeita!')) return;
+  loading('Excluindo seção...');
+  try {
+    var r = await invApi.excluirSecao(_token, secaoId);
+    unload();
+    if (r.sucesso) { toast(r.mensagem, 'ok'); init(); }
+    else if (r.expirado) { invSessao.limpar(); location.href='login.html'; }
+    else toast(r.mensagem, 'err');
+  } catch(e) { unload(); toast('Erro: '+e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SINCRONIZAR PASTAS
+// ═══════════════════════════════════════════════════════════
+async function sincronizarPastas() {
+  if (!confirm('Criar pastas no Drive para todas as seções que ainda não têm pasta?\n\nSeções já com pasta não serão afetadas.')) return;
+  loading('Sincronizando pastas no Drive...');
+  try {
+    var r = await invApi.sincronizarPastas(_token);
+    unload();
+    if (r.sucesso) {
+      toast(r.mensagem, 'ok');
+      if (r.criadas > 0) alert('Sincronização concluída!\n\n'+r.mensagem+(r.detalhes ? '\n\n'+r.detalhes.join('\n') : ''));
+    } else if (r.expirado) { invSessao.limpar(); location.href='login.html'; }
+    else toast(r.mensagem, 'err');
+  } catch(e) { unload(); toast('Erro: '+e.message, 'err'); }
 }
 
 // ═══════════════════════════════════════════════════════════
